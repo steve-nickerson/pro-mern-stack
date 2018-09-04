@@ -15,19 +15,6 @@ const issues = [
     }
 ]
 
-class BorderWrap extends React.Component {
-    render() {
-        const borderedStyle = { border: "1px solid silver", padding: 6 }
-
-        return (
-            <div style={borderedStyle}>
-                {this.props.children}
-            </div>
-        )
-    }
-}
-
-
 class IssueFilter extends React.Component {
     render() {
         return (
@@ -80,21 +67,76 @@ class IssueTable extends React.Component {
 }
 
 class IssueAdd extends React.Component {
+    constructor() {
+        super()
+        this.handleSubmit = this.handleSubmit.bind(this)
+    }
+
+    handleSubmit(e) {
+        e.preventDefault()
+        var form = document.forms.issueAdd
+        this.props.createIssue({
+            owner: form.owner.value,
+            title: form.title.value,
+            status: 'New',
+            created: new Date()
+        })
+        form.owner.value = ''
+        form.title.value = ''
+    }
+
     render() {
         return (
-            <div>This is a placeholder for the Issue Add.</div>
+            <div>
+                <form name="issueAdd" onSubmit={this.handleSubmit}>
+                    <input type="text" name="owner" placeholder="Owner" />
+                    <input type="text" name="title" placeholder="Title" />
+                    <button>Add</button>
+                </form>
+            </div>
         )
     }
 }
 
 class IssueList extends React.Component {
+    constructor() {
+        super()
+        this.state = { issues: [] }
+
+        this.createIssue = this.createIssue.bind(this)
+    }
+
+    componentDidMount() {
+        this.loadData()
+    }
+
+    loadData() {
+        setTimeout(() => {
+            this.setState({ issues: issues })
+        }, 500)
+    }
+
+    createIssue(newIssue) {
+        const newIssues = this.state.issues.slice()
+        newIssue.id = this.state.issues.length + 1
+        newIssues.push(newIssue)
+        this.setState({ issues: newIssues })
+    }
+
+    createTestIssue() {
+        this.createIssue({
+            status: 'New', owner: 'Pieta', created: new Date(),
+            title: 'Completion date should be optional'
+        })
+    }
+
     render() {
         return (
             <div><h1>Issue Tracker</h1>
                 <hr />
-                <IssueTable issues={issues} />
+                <IssueTable issues={this.state.issues} />
                 <hr />
-                <IssueAdd />
+                <IssueAdd createIssue={this.createIssue}  />
             </div>
         )
     }
